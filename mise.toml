@@ -1,0 +1,49 @@
+[tools]
+swiftformat = "latest"
+swiftlint = "latest"
+
+[env]
+APP = "build/Webcam.app"
+
+[tasks.build]
+description = "Compile and bundle build/Webcam.app"
+sources = ["Sources/**/*.swift", "Resources/*"]
+outputs = ["build/Webcam.app/Contents/MacOS/Webcam"]
+run = """
+rm -rf "$APP"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+swiftc -O -swift-version 6 -o "$APP/Contents/MacOS/Webcam" Sources/*.swift
+cp Resources/Info.plist "$APP/Contents/"
+cp Resources/AppIcon.icns "$APP/Contents/Resources/"
+codesign --force --sign - "$APP"
+"""
+
+[tasks.run]
+description = "Build and open the app"
+depends = ["build"]
+run = "open \"$APP\""
+
+[tasks.install]
+description = "Copy the app to ~/Applications"
+depends = ["build"]
+run = """
+mkdir -p ~/Applications
+rm -rf ~/Applications/Webcam.app
+cp -R "$APP" ~/Applications/
+"""
+
+[tasks.format]
+description = "Format Swift sources"
+run = "swiftformat ."
+
+[tasks.lint]
+description = "Check formatting and lint"
+run = ["swiftformat --lint .", "swiftlint --strict --quiet"]
+
+[tasks.icon]
+description = "Regenerate Resources/AppIcon.icns"
+run = "scripts/icon.sh"
+
+[tasks.clean]
+description = "Remove build output"
+run = "rm -rf build"
