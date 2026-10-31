@@ -56,3 +56,7 @@ scripts/icon.swift   draws the icon with Core Graphics
 scripts/icon.sh      turns it into an .icns
 mise.toml            tools and tasks
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
