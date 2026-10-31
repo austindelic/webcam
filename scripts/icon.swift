@@ -1,5 +1,5 @@
-// Draws the 1024px app icon: a screen with the camera light on at the top
-// and a little video window in the bottom-right corner. Flat colours only.
+// Draws the 1024px app icon: you, on camera, with the camera light on.
+// Flat colours only.
 // Usage: swift scripts/icon.swift <output.png>
 
 import AppKit
@@ -7,6 +7,11 @@ import AppKit
 let canvas: CGFloat = 1024
 // Apple's macOS icon grid: an 824pt rounded square centred on a 1024pt canvas.
 let tile = CGRect(x: 100, y: 100, width: 824, height: 824)
+let tileRadius: CGFloat = 185
+
+let ink = color(0x1E1E1E)
+let paper = color(0xEDEAE4)
+let light = color(0x30C552)
 
 func color(_ hex: UInt32) -> CGColor {
     CGColor(
@@ -17,10 +22,8 @@ func color(_ hex: UInt32) -> CGColor {
     )
 }
 
-func fillRoundedRect(_ ctx: CGContext, _ rect: CGRect, radius: CGFloat, _ fill: CGColor) {
-    ctx.addPath(CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil))
-    ctx.setFillColor(fill)
-    ctx.fillPath()
+func circle(_ center: CGPoint, _ radius: CGFloat) -> CGRect {
+    CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
 }
 
 let ctx = CGContext(
@@ -29,33 +32,25 @@ let ctx = CGContext(
     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
 )!
 
-// Screen.
-fillRoundedRect(ctx, tile, radius: 185, color(0xEDEAE4))
+let tilePath = CGPath(roundedRect: tile, cornerWidth: tileRadius, cornerHeight: tileRadius, transform: nil)
+
+// The video.
+ctx.addPath(tilePath)
+ctx.setFillColor(ink)
+ctx.fillPath()
+
+// You: head and shoulders, cut off by the bottom of the frame.
+ctx.saveGState()
+ctx.addPath(tilePath)
+ctx.clip()
+ctx.setFillColor(paper)
+ctx.fillEllipse(in: CGRect(x: 512 - 260, y: tile.minY - 200, width: 520, height: 420))
+ctx.fillEllipse(in: circle(CGPoint(x: 512, y: tile.minY + 340), 120))
+ctx.restoreGState()
 
 // Camera light.
-let light: CGFloat = 26
-ctx.setFillColor(color(0x30C552))
-ctx.fillEllipse(in: CGRect(
-    x: canvas / 2 - light,
-    y: tile.maxY - 96 - light,
-    width: light * 2,
-    height: light * 2
-))
-
-// The webcam window, 16:9, tucked into the corner like the app.
-let window = CGSize(width: 448, height: 252)
-let inset: CGFloat = 112
-fillRoundedRect(
-    ctx,
-    CGRect(
-        x: tile.maxX - inset - window.width,
-        y: tile.minY + inset,
-        width: window.width,
-        height: window.height
-    ),
-    radius: 44,
-    color(0x161616)
-)
+ctx.setFillColor(light)
+ctx.fillEllipse(in: circle(CGPoint(x: 512, y: tile.maxY - 84), 24))
 
 let output = URL(fileURLWithPath: CommandLine.arguments[1])
 let png = NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])!

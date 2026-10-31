@@ -17,10 +17,10 @@ One Swift file.
 ## Use it
 
 | Do this               | To                    |
-| --------------------- | --------------------- |
-| Drag the video        | Move it               |
-| Drag an edge          | Resize it (stays 16:9) |
-| Press <kbd>Esc</kbd> or <kbd>Q</kbd> | Quit   |
+| --- | --- |
+| Drag the video | Move it |
+| Drag an edge | Resize it (stays 16:9) |
+| Press <kbd>Esc</kbd> or <kbd>Q</kbd> | Quit |
 
 The first time you open it, macOS asks for camera access. If you say no, it quits.
 
@@ -29,7 +29,7 @@ The first time you open it, macOS asks for camera access. If you say no, it quit
 You need Xcode (or the Command Line Tools) and [mise](https://mise.jdx.dev).
 
 ```sh
-mise install       # swiftformat + swiftlint
+mise install       # swiftformat, swiftlint, dmgbuild
 mise run run       # build and open
 mise run install   # copy to ~/Applications
 ```
@@ -38,6 +38,7 @@ Other tasks:
 
 ```sh
 mise run build     # build/Webcam.app
+mise run dmg       # build/Webcam.dmg, the drag-to-Applications installer
 mise run lint      # swiftformat --lint + swiftlint
 mise run format    # swiftformat
 mise run icon      # redraw Resources/AppIcon.icns from scripts/icon.swift
@@ -50,11 +51,13 @@ There's no Xcode project. `mise run build` calls `swiftc` on `Sources/main.swift
 ## What's in here
 
 ```
-Sources/main.swift   the whole app
-Resources/           Info.plist and the icon
-scripts/icon.swift   draws the icon with Core Graphics
-scripts/icon.sh      turns it into an .icns
-mise.toml            tools and tasks
+Sources/main.swift              the whole app
+Resources/                      Info.plist and the icon
+scripts/icon.swift              draws the icon with Core Graphics
+scripts/icon.sh                 turns it into an .icns
+scripts/dmg-background.swift    draws the DMG window background
+scripts/dmg.py                  dmgbuild settings: window size and icon positions
+mise.toml                       tools and tasks
 ```
 
 ## License

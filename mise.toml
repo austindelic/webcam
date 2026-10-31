@@ -1,6 +1,7 @@
 [tools]
 swiftformat = "latest"
 swiftlint = "latest"
+"pipx:dmgbuild" = "latest"
 
 [env]
 APP = "build/Webcam.app"
@@ -30,6 +31,17 @@ run = """
 mkdir -p ~/Applications
 rm -rf ~/Applications/Webcam.app
 cp -R "$APP" ~/Applications/
+"""
+
+[tasks.dmg]
+description = "Package build/Webcam.dmg with a drag-to-Applications window"
+depends = ["build"]
+run = """
+rm -rf build/dmg build/Webcam.dmg
+mkdir -p build/dmg
+swift scripts/dmg-background.swift build/dmg
+tiffutil -cathidpicheck build/dmg/background.png build/dmg/background@2x.png -out build/dmg/background.tiff
+dmgbuild -s scripts/dmg.py -D app="$APP" -D background=build/dmg/background.tiff Webcam build/Webcam.dmg
 """
 
 [tasks.format]
