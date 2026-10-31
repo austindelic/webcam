@@ -4,7 +4,11 @@
 
 import AppKit
 
+/// The window as it opens. Everything is laid out in this box.
 let size = CGSize(width: 640, height: 400)
+/// Finder pins the background to the top-left and shows white past its edges, so the
+/// image is big enough to fill the window at any size. Plain paper compresses to nearly nothing.
+let canvas = CGSize(width: 3200, height: 2000)
 let appIcon = CGPoint(x: 170, y: 210)
 let applicationsIcon = CGPoint(x: 470, y: 210)
 
@@ -30,8 +34,8 @@ func draw(_ text: String, font: NSFont, color: NSColor, centerX: CGFloat, top: C
 func render(scale: CGFloat) -> Data {
     let rep = NSBitmapImageRep(
         bitmapDataPlanes: nil,
-        pixelsWide: Int(size.width * scale),
-        pixelsHigh: Int(size.height * scale),
+        pixelsWide: Int(canvas.width * scale),
+        pixelsHigh: Int(canvas.height * scale),
         bitsPerSample: 8,
         samplesPerPixel: 4,
         hasAlpha: true,
@@ -40,13 +44,18 @@ func render(scale: CGFloat) -> Data {
         bytesPerRow: 0,
         bitsPerPixel: 0
     )!
-    rep.size = size
+    rep.size = canvas
 
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
 
     paper.setFill()
-    CGRect(origin: .zero, size: size).fill()
+    CGRect(origin: .zero, size: canvas).fill()
+
+    // Lay out in the window-sized box at the top-left of the canvas.
+    let toTopLeft = NSAffineTransform()
+    toTopLeft.translateX(by: 0, yBy: canvas.height - size.height)
+    toTopLeft.concat()
 
     // Wordmark, led by the camera light.
     let title = NSAttributedString(
